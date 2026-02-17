@@ -48,7 +48,11 @@ def create_tokenizer(name: str, vocab_path: str, max_vocab_size: int):
 
     elif name == 'bert':
         word_embed = None
-        tokenizer = BertTokenizer.from_pretrained(LOCAL_KOBERT_DIR, do_lower_case=False)
+        tokenizer = BertTokenizer(
+            vocab_file=os.path.join(LOCAL_KOBERT_DIR, "vocab.txt"),
+            do_lower_case=False
+        )
+
         return tokenizer, word_embed
 
     else:
