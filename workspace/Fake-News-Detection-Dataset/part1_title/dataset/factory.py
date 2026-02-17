@@ -7,8 +7,6 @@ from torch.utils.data import DataLoader
 
 import gluonnlp as nlp
 
-from kobert import get_pytorch_kobert_model
-from kobert.utils import get_tokenizer
 from transformers import BertTokenizer
 import os
 
