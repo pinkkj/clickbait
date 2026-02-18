@@ -7,9 +7,6 @@ from torch.utils.data import DataLoader
 
 import gluonnlp as nlp
 
-from kobert import get_pytorch_kobert_model
-from kobert.utils import get_tokenizer
-
 from .build_dataset import *
 from .tokenizer import FNDTokenizer
 from typing import Union
@@ -37,8 +34,16 @@ def create_tokenizer(name: str, vocab_path: str, max_vocab_size: int):
         tokenizer = FNDTokenizer(vocab = vocab, tokenizer = Mecab())
     elif name == 'bert':
         word_embed = None
-        _, vocab = get_pytorch_kobert_model(cachedir=".cache")
-        tokenizer = nlp.data.BERTSPTokenizer(get_tokenizer(), vocab, lower=False)
+
+        spiece_path = "/home/ubuntu/clickbait/workspace/Fake-News-Detection-Dataset/part1_title/.cache/kobert_news_wiki_ko_cased-1087f8699e.spiece"
+
+        # ✅ from_sentencepiece에는 vocab.txt가 아니라 sentencepiece 모델 파일을 넣어야 함
+        vocab = nlp.vocab.BERTVocab.from_sentencepiece(spiece_path, padding_token='[PAD]')
+
+        # sentencepiece tokenizer 로딩
+        tokenizer = nlp.data.BERTSPTokenizer(spiece_path, vocab, lower=False)
+
+
 
     return tokenizer, word_embed 
 
