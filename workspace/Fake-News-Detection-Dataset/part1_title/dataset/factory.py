@@ -7,8 +7,8 @@ from torch.utils.data import DataLoader
 
 import gluonnlp as nlp
 
-from transformers import BertTokenizer
-import os
+from kobert import get_pytorch_kobert_model
+from kobert.utils import get_tokenizer
 
 from .build_dataset import *
 from .tokenizer import FNDTokenizer
@@ -31,30 +31,16 @@ def extract_word_embedding(vocab_path: str, max_vocab_size: int =-1) -> Union[li
 
 
 
-LOCAL_KOBERT_DIR = os.path.join(
-    os.path.dirname(__file__),
-    "..",
-    ".cache",
-    "kobert_local"
-)
-
 def create_tokenizer(name: str, vocab_path: str, max_vocab_size: int):
     if name == 'mecab':
-        vocab, word_embed = extract_word_embedding(vocab_path=vocab_path, max_vocab_size=max_vocab_size)
-        tokenizer = FNDTokenizer(vocab=vocab, tokenizer=Mecab())
-        return tokenizer, word_embed
-
+        vocab, word_embed = extract_word_embedding(vocab_path = vocab_path, max_vocab_size = max_vocab_size)
+        tokenizer = FNDTokenizer(vocab = vocab, tokenizer = Mecab())
     elif name == 'bert':
         word_embed = None
-        tokenizer = BertTokenizer(
-            vocab_file=os.path.join(LOCAL_KOBERT_DIR, "vocab.txt"),
-            do_lower_case=False
-        )
+        _, vocab = get_pytorch_kobert_model(cachedir=".cache")
+        tokenizer = nlp.data.BERTSPTokenizer(get_tokenizer(), vocab, lower=False)
 
-        return tokenizer, word_embed
-
-    else:
-        raise ValueError(f"Unknown tokenizer name: {name}")
+    return tokenizer, word_embed 
 
 
 def create_dataset(name: str, data_path: str, direct_path: Union[None, str], split: str, tokenizer, saved_data_path: str, **kwargs):
